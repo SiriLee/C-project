@@ -29,6 +29,7 @@ int main() {
 	int input = 0;
 	do {
 		menu();
+	again:
 		scanf("%d", &input);
 
 		switch ((enum choice)input) {
@@ -50,7 +51,12 @@ int main() {
 		case Print:
 			print(&con);
 			break;
+		case Exit:
+			exit_m(&con);
+			break;
 		default:
+			printf("输入错误，请重新输入：\n");
+			goto again;
 			break;
 		}
 
