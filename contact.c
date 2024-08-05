@@ -10,25 +10,35 @@ void wait_enter() {
 	while (getchar() != '\n');//等待回车
 	system("cls");
 }
-
+//
 void InitContact(Contact* main_con) {
 	main_con->size = 0;
-	memset(main_con->data, 0, sizeof(main_con->data));//data所有字节赋值为0
+	main_con->capacity = DEFAULT_CAP;
+	PeoInfo* ptr = (PeoInfo*)calloc(DEFAULT_CAP, sizeof(PeoInfo));
+	if (ptr != NULL)
+		main_con->data = ptr;//分配动态内存空间
+	else
+		perror("InitContact");//空间不足时报错
 }
 
-
+//
 void add(Contact* main_con) {
 	system("cls");
 
-	if (main_con->size == MAX_NUM) {
-		printf("     _______________________________________\n\n");
-		printf("                    警告\n\n\t通讯录空间已满，无法删除联系人！\n\n");
-		printf("     _______________________________________\n");
-		//printf("\n\n点击回车以继续...\n");
-		wait_enter();
-		return;
+	if (main_con->size == main_con->capacity - 1) {  //-1保证有缓冲空间，利于del_m函数稳定实现
+		PeoInfo* ptr = realloc(main_con->data, (main_con->capacity += INC_CAP) * sizeof(PeoInfo));//realloc函数调整
+		if (ptr != NULL)
+			main_con->data = ptr;
+		else{ 
+			perror("add"); 
+			printf("\n     _______________________________________\n\n");
+			printf("                    警告\n\n\t通讯录空间不足，无法增加联系人！\n\n");
+			printf("     _______________________________________\n");
+			wait_enter();
+			return;
+		}
 	}
-
+	//空间不足时微调
 
 	printf("         新建联系人\n_____________________________\n");
 
@@ -86,7 +96,7 @@ void del(Contact* main_con) {
 		wait_enter();
 		return;
 	}
-	
+
 	system("cls");
 	printf("\n已找到指定联系人\n\n");
 	printf("%-20s\t%-5s\t%-5s\t%-20s\t%-30s\n", "姓名", "性别", "年龄", "电话号码", "地址");
@@ -96,7 +106,7 @@ void del(Contact* main_con) {
 		main_con->data[ret].age,
 		main_con->data[ret].tele_num,
 		main_con->data[ret].addr);
-	
+
 	printf("\n请确认是否将其删除(1:确认/2：取消)\n");
 	int input;
 	scanf("%d", &input);
@@ -105,7 +115,7 @@ void del(Contact* main_con) {
 		del_m(main_con, ret);
 		printf("\n\n删除成功！\n");
 	}
-	else 
+	else
 		printf("\n\n已取消删除\n");
 
 	wait_enter();
@@ -132,7 +142,7 @@ int search_m(const Contact* main_con, enum search_type search_t, const char* con
 		break;
 	case addr:
 		for (i = 0; i < main_con->size; i++) {
-			if (strcmp(content, main_con->data[i].addr) == 0) 
+			if (strcmp(content, main_con->data[i].addr) == 0)
 				return (int)i;
 		}
 		return -1;
@@ -248,7 +258,7 @@ void modify(Contact* main_con) {
 	int input;
 	scanf("%d", &input);
 
-	if (input != 1 && input != 2 && input != 3  && input != 4 && input != 5) {
+	if (input != 1 && input != 2 && input != 3 && input != 4 && input != 5) {
 		printf("\n\n输入错误\n");
 		wait_enter();
 		return;
@@ -357,4 +367,9 @@ void print(const Contact* main_con) {
 	print_m(main_con);
 
 	wait_enter();
+}
+//
+void exit_m(Contact* main_con) {
+	free(main_con->data);
+	main_con->data = NULL;
 }
