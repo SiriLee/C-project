@@ -10,27 +10,48 @@ void wait_enter() {
 	while (getchar() != '\n');//等待回车
 	system("cls");
 }
-//
+
 void InitContact(Contact* main_con) {
-	main_con->size = 0;
-	main_con->capacity = DEFAULT_CAP;
-	PeoInfo* ptr = (PeoInfo*)calloc(DEFAULT_CAP, sizeof(PeoInfo));
+
+	FILE* pfile_info = fopen("coninfo.dat", "r");//打开文件
+	
+	if (pfile_info == NULL) { //第一次使用程序
+		main_con->size = 0;
+		main_con->capacity = DEFAULT_CAP;
+	}
+	else//第n次使用，继承size和capacity数据
+		fscanf(pfile_info, "%zd %zd", &(main_con->size), &(main_con->capacity));
+
+
+	//calloc函数分配动态空间
+	PeoInfo* ptr = (PeoInfo*)calloc(main_con->capacity, sizeof(PeoInfo));
 	if (ptr != NULL)
 		main_con->data = ptr;//分配动态内存空间
 	else
 		perror("InitContact");//空间不足时报错
+	
+
+	if (pfile_info == NULL)
+		return;//第一次使用程序，函数直接结束
+
+	FILE* pfile_data = fopen("condata.dat", "r");
+	for (size_t i = 0; i < main_con->size; i++)
+		fread(main_con->data + i, sizeof(PeoInfo), 1, pfile_data);
+	//第n次使用，将data的数据拷贝
 }
 
-//
+
 void add(Contact* main_con) {
 	system("cls");
 
-	if (main_con->size == main_con->capacity - 1) {  //-1保证有缓冲空间，利于del_m函数稳定实现
-		PeoInfo* ptr = realloc(main_con->data, (main_con->capacity += INC_CAP) * sizeof(PeoInfo));//realloc函数调整
+	if (main_con->size == main_con->capacity - 1) {
+		//-1保证有缓冲空间，利于del_m函数稳定实现
+		PeoInfo* ptr = realloc(main_con->data, (main_con->capacity += INC_CAP) * sizeof(PeoInfo));
+		//realloc函数调整
 		if (ptr != NULL)
 			main_con->data = ptr;
-		else{ 
-			perror("add"); 
+		else {
+			perror("add");
 			printf("\n     _______________________________________\n\n");
 			printf("                    警告\n\n\t通讯录空间不足，无法增加联系人！\n\n");
 			printf("     _______________________________________\n");
@@ -39,6 +60,7 @@ void add(Contact* main_con) {
 		}
 	}
 	//空间不足时微调
+
 
 	printf("         新建联系人\n_____________________________\n");
 
@@ -79,7 +101,6 @@ void del(Contact* main_con) {
 		printf("     _______________________________________\n\n");
 		printf("                    警告\n\n\t通讯录内容空白，无法删除联系人！\n\n");
 		printf("     _______________________________________\n");
-		//printf("\n\n点击回车以继续...\n");
 		wait_enter();
 		return;
 	}
@@ -368,8 +389,38 @@ void print(const Contact* main_con) {
 
 	wait_enter();
 }
-//
+
 void exit_m(Contact* main_con) {
 	free(main_con->data);
 	main_con->data = NULL;
+}
+
+void SaveContact(Contact* main_con) {
+	FILE* pfile_data = fopen("condata.dat", "w");
+	FILE* pfile_info = fopen("coninfo.dat", "w");//打开文件
+	if (pfile_data == NULL) {
+		perror("File Open");
+		return;
+	}
+	if (pfile_info == NULL) {
+		perror("File Open");
+		return;
+	}//错误情况
+
+	
+	for (size_t i = 0; i < main_con->size; i++)
+		fwrite(main_con->data + i, sizeof(PeoInfo), 1, pfile_data);
+	//写data文件
+	
+	fprintf(pfile_info, "%zd %zd", main_con->size, main_con->capacity);
+	//写info文件
+
+	//关闭文件
+	fclose(pfile_data);
+	pfile_data = NULL;
+	fclose(pfile_info);
+	pfile_info = NULL;
+
+	printf("\n\n通讯录保存成功！程序已退出\n");
+	wait_enter();
 }

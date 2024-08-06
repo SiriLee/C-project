@@ -16,7 +16,7 @@ void menu() {
 	printf("          1.新建           2.删除        \n");
 	printf("          3.搜索           4.修改        \n");
 	printf("          5.排序           6.打印        \n");
-	printf("          0.退出                         \n");
+	printf("          0.退出                         \n");//
 	printf("\n请选择：");
 }
 //菜单主页
@@ -25,7 +25,7 @@ int main() {
 	Contact con;
 	InitContact(&con);
 	//初始化通讯录
-
+	
 	int input = 0;
 	do {
 		menu();
@@ -52,6 +52,8 @@ int main() {
 			print(&con);
 			break;
 		case Exit:
+			//
+			SaveContact(&con);
 			exit_m(&con);
 			break;
 		default:
@@ -59,7 +61,6 @@ int main() {
 			goto again;
 			break;
 		}
-
 	} while (input);
 
 	return 0;

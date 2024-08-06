@@ -7,10 +7,9 @@
 #define MAX_ADDR 30//地址最大长度
 #define MAX_SEX 5 //性别字符最大长度
 
-#define DEFAULT_CAP 2 //初始空间分配容量
-#define INC_CAP 2 //空间不足时增加的单位容量
+#define DEFAULT_CAP 100 //初始空间分配容量
+#define INC_CAP 10 //空间不足时增加的单位容量
 
-//#define MAX_NUM 1000//通讯录最大容量
 
 #include <stdio.h>
 #include <string.h>
@@ -51,10 +50,9 @@ typedef struct PeoInfo {
 	char addr[MAX_ADDR];
 }PeoInfo;
 //通讯录个人信息
-//
+
 typedef struct Contact {
-	//PeoInfo data[MAX_NUM + 1];//个人信息合集   +1作为缓冲空间
-	PeoInfo* data;
+	PeoInfo* data;//数据总体的指针（数组），可变大小
 	size_t size;//当前通讯录长度
 	size_t capacity;//当前通讯录容量
 }Contact;
@@ -98,9 +96,11 @@ void print(const Contact* main_con
 void print_m(const Contact* main_con
 );//展示通讯录算法
 
-//
-void exit_m(Contact* main_con);
-////回收动态内存空间，指针赋空值
+void exit_m(Contact* main_con
+);//回收动态内存空间，指针赋空值
+
+void SaveContact(Contact* main_con
+);//保存通讯录信息于文件中
 
 /*代码缺陷：无法避免信息(名字、电话号码)重复问题，
 且当重复时(名字、电话号码、地址)使用搜索功能只能找到唯一对象*/
